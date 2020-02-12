@@ -1,0 +1,6 @@
+# main training requirements
+tensorflow >= 2.0.0
+numpy
+opencv-python
+matplotlib
+sklearn
