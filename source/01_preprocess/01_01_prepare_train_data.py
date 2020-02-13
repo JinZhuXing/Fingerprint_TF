@@ -37,6 +37,9 @@ def parse_file_name2(img_path):
 # %%
 # get fingerprint region for crop
 def get_fp_region(img_path):
+    CropWidth = 160
+    CropHeight = 160
+
     image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     thresh = filters.threshold_otsu(image)
 
@@ -64,38 +67,38 @@ def get_fp_region(img_path):
                 if (crop_b < i):
                     crop_b = i
 
-    if ((crop_r - crop_l) < 160):
-        diff = 160 - (crop_r - crop_l)
-        if (crop_r + crop_l > 160): # right
+    if ((crop_r - crop_l) < CropWidth):
+        diff = CropWidth - (crop_r - crop_l)
+        if (crop_r + crop_l > CropWidth): # right
             if (img_width - crop_r > diff / 2):
                 crop_r += diff / 2
                 crop_l -= diff / 2
             else:
                 crop_r = img_width - 1
-                crop_l = crop_r - 162
+                crop_l = crop_r - (CropWidth + 2)
         else: # left
             if (crop_l > diff / 2):
                 crop_l -= diff / 2
                 crop_r += diff / 2
             else:
                 crop_l = 1
-                crop_r = crop_l + 162
-    if ((crop_b - crop_t) < 160):
-        diff = 160 - (crop_b - crop_t)
-        if (crop_b + crop_t > 160): # bottom
+                crop_r = crop_l + (CropWidth + 2)
+    if ((crop_b - crop_t) < CropHeight):
+        diff = CropHeight - (crop_b - crop_t)
+        if (crop_b + crop_t > CropHeight): # bottom
             if (img_height - crop_b > diff / 2):
                 crop_b += diff / 2
                 crop_t -= diff / 2
             else:
                 crop_b = img_height - 1
-                crop_t = crop_b - 162
+                crop_t = crop_b - (CropHeight + 2)
         else: # top
             if (crop_t > diff / 2):
                 crop_t -= diff / 2
                 crop_b += diff / 2
             else:
                 crop_t = 1
-                crop_b = crop_t + 162
+                crop_b = crop_t + (CropHeight + 2)
 
     return (crop_l, crop_t, crop_r, crop_b)
 
@@ -103,6 +106,8 @@ def get_fp_region(img_path):
 
 # %%
 # make train data with augmentation
+CropWidth = 160
+CropHeight = 160
 finger_idx = 0
 finger_id = 0
 for item in img_list:
@@ -124,9 +129,9 @@ for item in img_list:
     img = Image.open(img_path)
 
     # single crop
-    crop_x = (crop_r + crop_l - 160) / 2
-    crop_y = (crop_t + crop_b - 160) / 2
-    img_c = img.crop([crop_x, crop_y, crop_x + 160, crop_y + 160])
+    crop_x = (crop_r + crop_l - CropWidth) / 2
+    crop_y = (crop_t + crop_b - CropHeight) / 2
+    img_c = img.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
     img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
     img_c.save(img_path_new)
     finger_idx += 1
@@ -135,7 +140,7 @@ for item in img_list:
     for i in range(3):
         ang = random.randint(10, 350)
         img_rot = img.rotate(ang)
-        img_c = img_rot.crop([crop_x, crop_y, crop_x + 160, crop_y + 160])
+        img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
         img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
         img_c.save(img_path_new)
         finger_idx += 1
@@ -145,7 +150,7 @@ for item in img_list:
         ang = random.randint(10, 350)
         img_autocont = ImageOps.autocontrast(img, 20)
         img_rot = img_autocont.rotate(ang)
-        img_c = img_rot.crop([crop_x, crop_y, crop_x + 160, crop_y + 160])
+        img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
         img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
         img_c.save(img_path_new)
         finger_idx += 1
@@ -155,7 +160,7 @@ for item in img_list:
         ang = random.randint(10, 350)
         img_enhance = ImageEnhance.Brightness(img).enhance(2)
         img_rot = img_enhance.rotate(ang)
-        img_c = img_rot.crop([crop_x, crop_y, crop_x + 160, crop_y + 160])
+        img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
         img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
         img_c.save(img_path_new)
         finger_idx += 1
@@ -168,7 +173,7 @@ for item in img_list:
         img_arr = np.array(img_rot)
         util.random_noise(img_arr, mode = 'gaussian')
         img_rot = Image.fromarray(img_arr)
-        img_c = img_rot.crop([crop_x, crop_y, crop_x + 160, crop_y + 160])
+        img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
         img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
         img_c.save(img_path_new)
         finger_idx += 1
