@@ -12,6 +12,17 @@ Fingerprint recognition using Tensorflow2.
 ### Reference
     https://github.com/kairess/fingerprint_recognition
 
+
+## Preprocess
+
+
 ## Train
 
+
 ## Evaluation
+
+
+## Donate
+Please donate fingerprint image dataset for research purpose.
+
+Thanks.
