@@ -132,3 +132,4 @@ dmypy.json
 *.bmp
 *.tif
 *.npy
+*.7z
