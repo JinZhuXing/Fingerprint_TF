@@ -154,16 +154,6 @@ for item in img_list:
         img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
         img_c.save(img_path_new)
         finger_idx += 1
-
-    # bright enhance
-    for i in range(3):
-        ang = random.randint(10, 350)
-        img_enhance = ImageEnhance.Brightness(img).enhance(2)
-        img_rot = img_enhance.rotate(ang)
-        img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-        img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-        img_c.save(img_path_new)
-        finger_idx += 1
     
     # noise
     for i in range(3):

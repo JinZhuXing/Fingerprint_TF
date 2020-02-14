@@ -51,8 +51,8 @@ for i, img_path in enumerate(img_list):
     # get user id
     labels[i] = parse_file_name(img_path)
 
-np.save('./dataset/np_data/img_real.npy', imgs)
-np.save('./dataset/np_data/img_real.npy', labels)
+np.save('../../dataset/np_data/img_real.npy', imgs)
+np.save('../../dataset/np_data/label_real.npy', labels)
 
 print('Complete')
 
