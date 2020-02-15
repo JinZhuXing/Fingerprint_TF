@@ -1,5 +1,5 @@
 # Fingerprint_TF
-Fingerprint recognition using Tensorflow2.
+Deep Learning fingerprint recognition using Tensorflow2.
 
 ### Image Information
     Fingerprint image size is 160x160(500DPI).
