@@ -139,3 +139,6 @@ model
 
 # resource
 *.pptx
+
+# Tensorboard logs
+logs

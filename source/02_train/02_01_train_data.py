@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 import random
 
 import os
+import datetime
 
 
 print("Version: ", tf.__version__)
@@ -149,6 +150,16 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_path, sav
 
 
 # %%
+# prepare tensorboard
+if os.name == 'nt':
+    tfb_log_dir = '..\\..\\logs\\train\\' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+else:
+    tfb_log_dir = '../../logs/train/' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir = tfb_log_dir, histogram_freq = 1)
+
+
+
+# %%
 # prepare model
 model = build_model()
 if (os.path.exists(checkpoint_path + '.index')):
@@ -159,7 +170,7 @@ if (os.path.exists(checkpoint_path + '.index')):
 
 # %%
 # training model
-history = model.fit(train_gen, epochs = 50, validation_data = val_gen, callbacks = [cp_callback])
+history = model.fit(train_gen, epochs = 50, validation_data = val_gen, callbacks = [cp_callback, tensorboard_callback])
 
 
 
