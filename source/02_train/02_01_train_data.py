@@ -170,7 +170,7 @@ if (os.path.exists(checkpoint_path + '.index')):
 
 # %%
 # training model
-history = model.fit(train_gen, epochs = 50, validation_data = val_gen, callbacks = [cp_callback, tensorboard_callback])
+history = model.fit(train_gen, epochs = 1000, validation_data = val_gen, callbacks = [cp_callback, tensorboard_callback])
 
 
 
