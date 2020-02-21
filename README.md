@@ -22,7 +22,9 @@ This dataset was created from FVC2000_DB4_B.
 
 
 ### Pretrained Model
-Coming soon.
+| Release Date | Training Dataset | Image Information | Validation accuracy | URL |
+| :----: | :----: | :----: | :----: | :----: |
+| 2020-02-21 | 17,859 Images (343 Fingers) | 160 x 160 (500DPI) | 0.9702 | [model.7z](https://github.com/JinZhuXing/Fingerprint_TF/releases/download/0.1/model.7z)
 
 
 ## Preprocess
