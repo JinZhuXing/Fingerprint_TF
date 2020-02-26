@@ -15,8 +15,7 @@ Deep Learning fingerprint recognition using Tensorflow2.
 ### Sample Dataset
 You can get sample dataset from here.
 
-    URL : https://pan.baidu.com/s/1N-Q7CJ1OMSF69XSrUwoOjA
-    Password : w2k4
+[Fingerprint Dataset for FVC2000_DB4_B in Kaggle](https://www.kaggle.com/peace1019/fingerprint-dataset-for-fvc2000-db4-b)
 
 This dataset was created from FVC2000_DB4_B.
 
