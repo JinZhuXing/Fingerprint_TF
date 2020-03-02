@@ -1,6 +1,10 @@
 # main training requirements
 tensorflow >= 2.0.0
+tensorboard >= 2.0.0
 numpy
 opencv-python
 matplotlib
-sklearn
+Pillow
+notebook
+scikit-image
+scikit-learn
