@@ -39,6 +39,8 @@ def parse_file_name2(img_path):
 def get_fp_region(img_path):
     CropWidth = 160
     CropHeight = 160
+    ExpWidth = 230
+    ExpHeight = 230
 
     image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     thresh = filters.threshold_otsu(image)
@@ -100,6 +102,37 @@ def get_fp_region(img_path):
                 crop_t = 1
                 crop_b = crop_t + (CropHeight + 2)
 
+    # expand region for rotation
+    crop_l = (crop_r + crop_l - CropWidth) / 2
+    crop_r = crop_l + CropWidth
+    crop_t = (crop_t + crop_b - CropHeight) / 2
+    crop_b = crop_t + CropHeight
+    crop_l = (int)(crop_l - ((ExpWidth - CropWidth) / 2))
+    crop_r = (int)(crop_r + ((ExpWidth - CropWidth) / 2))
+    crop_t = (int)(crop_t - ((ExpHeight - CropHeight) / 2))
+    crop_b = (int)(crop_b + ((ExpHeight - CropHeight) / 2))
+
+    # check expanded region
+    diff = 0
+    if (crop_l < 0):
+        diff = 0 - crop_l
+        crop_l = crop_l + diff
+        crop_r = crop_r + diff
+    if (crop_r >= img_width):
+        diff = crop_r - (img_width - 1)
+        crop_l = crop_l - diff
+        crop_r = crop_r - diff
+
+    diff = 0
+    if (crop_t < 0):
+        diff = 0 - crop_t
+        crop_t = crop_t + diff
+        crop_b = crop_b + diff
+    if (crop_b >= img_height):
+        diff = crop_b - (img_height - 1)
+        crop_t = crop_t - diff
+        crop_b = crop_b - diff
+
     return (crop_l, crop_t, crop_r, crop_b)
 
 
@@ -108,6 +141,8 @@ def get_fp_region(img_path):
 # make train data with augmentation
 CropWidth = 160
 CropHeight = 160
+ExpWidth = 230
+ExpHeight = 230
 finger_idx = 0
 finger_id = 0
 for item in img_list:
@@ -128,9 +163,12 @@ for item in img_list:
 
     img = Image.open(img_path)
 
+    # crop for process image
+    crop_x = (ExpWidth - CropWidth) / 2
+    crop_y = (ExpHeight - CropHeight) / 2
+    img = img.crop([crop_l, crop_t, crop_r, crop_b])
+
     # single crop
-    crop_x = (crop_r + crop_l - CropWidth) / 2
-    crop_y = (crop_t + crop_b - CropHeight) / 2
     img_c = img.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
     img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
     img_c.save(img_path_new)
