@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+from tensorflow.keras import optimizers
 from tensorflow.keras.models import Model
 
 from sklearn.utils import shuffle
@@ -28,11 +29,16 @@ def build_model():
 
     # share weights both inputs
     inputs = layers.Input(shape = (160, 160, 1))
-    feature = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(inputs)
+    feature = layers.Conv2D(32, kernel_size = 3, activation = 'relu')(inputs)
     feature = layers.MaxPooling2D(pool_size = 2)(feature)
-    feature = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(feature)
+    feature = layers.Conv2D(64, kernel_size = 3, activation = 'relu')(feature)
+    feature = layers.MaxPooling2D(pool_size = 2)(feature)
+    feature = layers.Conv2D(128, kernel_size = 3, activation = 'relu')(feature)
     feature = layers.MaxPooling2D(pool_size = 2)(feature)
     feature_model = Model(inputs = inputs, outputs = feature)
+
+    # show feature model summary
+    feature_model.summary()
 
     # two feature models that sharing weights
     x1_net = feature_model(x1)
@@ -40,20 +46,20 @@ def build_model():
 
     # subtract features
     net = layers.Subtract()([x1_net, x2_net])
-    net = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(net)
+    net = layers.Conv2D(128, kernel_size = 3, activation = 'relu')(net)
     net = layers.MaxPooling2D(pool_size = 2)(net)
     net = layers.Flatten()(net)
-    net = layers.Dense(64, activation = 'relu')(net)
+    net = layers.Dense(512, activation = 'relu')(net)
     net = layers.Dense(1, activation = 'sigmoid')(net)
     model = Model(inputs = [x1, x2], outputs = net)
 
     # compile
-    model.compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = ['acc'])
+    model.compile(loss = 'binary_crossentropy', optimizer = optimizers.RMSprop(lr=1e-4), metrics = ['acc'])
 
     # show summary
     model.summary()
 
-    return model
+    return (model, feature_model)
 
 
 
@@ -69,7 +75,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_path, sav
 
 # %%
 # prepare model
-model = build_model()
+(model, feature_model) = build_model()
 if (os.path.exists(checkpoint_path + '.index')):
     print('continue training')
     model.load_weights(checkpoint_path)
@@ -79,8 +85,9 @@ if (os.path.exists(checkpoint_path + '.index')):
 # %%
 # save model
 model_path = '../../model/result/fp160.h5'
-model_dir = os.path.dirname(model_path)
+model_feature_path = '../../model/result/fp160_feature.h5'
 model.save(model_path)
+feature_model.save(model_feature_path)
 
 
 
