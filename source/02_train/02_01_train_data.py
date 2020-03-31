@@ -50,11 +50,15 @@ def build_model():
 
     # share weights both inputs
     inputs = layers.Input(shape = (160, 160, 1))
-    feature = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(inputs)
+    feature = layers.Conv2D(32, kernel_size = 3, activation = 'relu')(inputs)
     feature = layers.MaxPooling2D(pool_size = 2)(feature)
-    feature = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(feature)
+    feature = layers.Conv2D(64, kernel_size = 3, activation = 'relu')(feature)
     feature = layers.MaxPooling2D(pool_size = 2)(feature)
+    feature = layers.Conv2D(64, kernel_size = 3, activation = 'relu')(feature)
     feature_model = Model(inputs = inputs, outputs = feature)
+
+    # show feature model summary
+    feature_model.summary()
 
     # two feature models that sharing weights
     x1_net = feature_model(x1)
@@ -62,7 +66,7 @@ def build_model():
 
     # subtract features
     net = layers.Subtract()([x1_net, x2_net])
-    net = layers.Conv2D(32, kernel_size = 3, padding = 'same', activation = 'relu')(net)
+    net = layers.Conv2D(64, kernel_size = 3, activation = 'relu')(net)
     net = layers.MaxPooling2D(pool_size = 2)(net)
     net = layers.Flatten()(net)
     net = layers.Dense(64, activation = 'relu')(net)
