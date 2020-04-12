@@ -28,8 +28,10 @@ print(img_data.shape, label_data.shape)
 # %%
 # load model
 model_path = '../../model/result/fp160.h5'
-model_dir = os.path.dirname(model_path)
+model_feature_path = '../../model/result/fp160_feature.h5'
+feature_model = tf.keras.models.load_model(model_feature_path)
 model = tf.keras.models.load_model(model_path)
+feature_model.summary()
 model.summary()
 
 
