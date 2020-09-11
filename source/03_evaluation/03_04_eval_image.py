@@ -53,25 +53,3 @@ plt.imshow(db_img.squeeze(), cmap='gray')
 
 
 # %%
-# match two image
-input_idx = 0
-db_idx = 1
-input_img = img_real[input_idx].reshape((1, 160, 160, 1)).astype(np.float32) / 255.
-db_img = img_real[db_idx].reshape((1, 160, 160, 1)).astype(np.float32) / 255.
-pred_right = model.predict([input_img, db_img])
-
-# show result
-plt.figure(figsize=(8, 4))
-plt.subplot(1, 2, 1)
-plt.title('Input: %s' %input_idx)
-plt.imshow(input_img.squeeze(), cmap='gray')
-plt.subplot(1, 2, 2)
-if (pred_right > 0.9):
-    plt.title('O: %.02f, %s' % (pred_right, db_idx))
-else:
-    plt.title('X: %.02f, %s' % (pred_right, db_idx))
-plt.imshow(db_img.squeeze(), cmap='gray')
-
-
-
-# %%
