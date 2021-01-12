@@ -66,8 +66,8 @@ Numpy data file can be generated with "01_03_prepare_dataset.py" file.
 
 You can get sample dataset from here.
 
-    URL : https://pan.baidu.com/s/1N-Q7CJ1OMSF69XSrUwoOjA
-    Password : w2k4
+    URL : https://pan.baidu.com/s/1Y4L5xgHNK47BeR9bVbRrqA
+    Password : xeqp
 
 This dataset was created from FVC2000_DB4_B.
 
