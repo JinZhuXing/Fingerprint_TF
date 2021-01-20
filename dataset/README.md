@@ -66,8 +66,15 @@ Numpy data file can be generated with "01_03_prepare_dataset.py" file.
 
 You can get sample dataset from here.
 
-    URL : https://pan.baidu.com/s/1Y4L5xgHNK47BeR9bVbRrqA
-    Password : xeqp
+---
+
+[Fingerprint Dataset for FVC2000_DB4_B in BaiduYun, Password: xeqp](https://pan.baidu.com/s/1Y4L5xgHNK47BeR9bVbRrqA)
+
+[Fingerprint Dataset for FVC2000_DB4_B in Google Drive](https://drive.google.com/file/d/1ArZ9ECb9fCDW0UUGzeugaeMBT3_FD7U0/view?usp=sharing)
+
+[Fingerprint Dataset for FVC2000_DB4_B in Kaggle](https://www.kaggle.com/peace1019/fingerprint-dataset-for-fvc2000-db4-b)
+
+---
 
 This dataset was created from FVC2000_DB4_B.
 
