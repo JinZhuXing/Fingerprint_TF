@@ -236,6 +236,7 @@ def main(args):
     check_point = args.check_point
     save_model = args.save_model
     save_model_path = args.save_model_path
+    train_epoch = args.train_epoch
 
     # check parameter
     if ((image_width > IMAGE_WIDTH_LIMIT) or (image_height > IMAGE_HEIGHT_LIMIT)):
@@ -253,24 +254,10 @@ def main(args):
     print('\tImage Height: ', image_height)
     print('\tDataset Path: ', dataset_path)
     print('\tCheckpoint Path: ', check_point)
-
-    # initialize data preparer
-    train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
-    img_data, label_data = train_data_pre.prepare_train_data()
-
-    # split data
-    img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
-    print(img_train.shape, label_train.shape)
-    print(img_val.shape, label_val.shape)
-
-    # prepare data generator
-    train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = True)
-    val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = True)
-
-    # configure checkpoint data
-    checkpoint_path = check_point + 'cp_' + str(image_width) + '_' + str(image_height) + '.ckpt'
+    print('\tTrain Epoch: ', train_epoch)
 
     # create a callback that saves the model's weights
+    checkpoint_path = check_point + 'cp_' + str(image_width) + '_' + str(image_height) + '.ckpt'
     cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_path, save_weights_only = True, verbose = 1)
 
     # prepare model
@@ -285,8 +272,22 @@ def main(args):
         model.save(model_path)
         return
 
-    # training model
-    model.fit(train_gen, epochs = 100, validation_data = val_gen, callbacks = [cp_callback])
+    # prepare data
+    while True:
+        train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
+        img_data, label_data = train_data_pre.prepare_train_data()
+
+        # split data
+        img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
+        print(img_train.shape, label_train.shape)
+        print(img_val.shape, label_val.shape)
+
+        # prepare data generator
+        train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = True)
+        val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = True)
+
+        # training model
+        model.fit(train_gen, epochs = train_epoch, validation_data = val_gen, callbacks = [cp_callback])
 
 
 # argument parser
@@ -306,6 +307,8 @@ def parse_arguments(argv):
         help = 'Only save model from checkpoint', default = 0)
     parser.add_argument('--save_model_path', type = str,
         help = 'Path to model', default = '../../model/result/')
+    parser.add_argument('--train_epoch', type = int,
+        help = 'Train epoch count', default = 100)
 
     return parser.parse_args(argv)
 
