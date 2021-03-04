@@ -221,4 +221,6 @@ class Prepare_Data:
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
 
-        return zip(train_imgs, train_labels)
+        train_imgs_arr = np.array(train_imgs)
+        train_labels_arr = np.array(train_labels)
+        return train_imgs_arr, train_labels_arr
