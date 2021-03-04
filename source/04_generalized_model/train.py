@@ -274,11 +274,15 @@ def main(args):
 
     # prepare data
     while True:
+        print('Prepare Dataset...')
         train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
         img_data, label_data = train_data_pre.prepare_train_data()
+        print('Finished: ', img_data.shape, label_data.shape)
 
         # split data
+        print('Split Dataset for train and validation...')
         img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
+        print('Finished: ')
         print(img_train.shape, label_train.shape)
         print(img_val.shape, label_val.shape)
 
