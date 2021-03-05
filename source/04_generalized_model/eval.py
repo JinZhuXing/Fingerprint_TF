@@ -26,6 +26,7 @@ def main(args):
     image_height = args.image_height
     dataset_path = args.dataset_path
     check_point = args.check_point
+    eval_count = args.eval_count
 
     # check parameter
     if ((image_width > IMAGE_WIDTH_LIMIT) or (image_height > IMAGE_HEIGHT_LIMIT)):
@@ -43,6 +44,7 @@ def main(args):
     print('\tImage Height: ', image_height)
     print('\tDataset Path: ', dataset_path)
     print('\tCheckpoint Path: ', check_point)
+    print('\tEval Count: ', eval_count)
 
     # prepare model
     model_net = Model_Net(image_width, image_height)
@@ -57,7 +59,7 @@ def main(args):
     # prepare data
     print('Prepare Dataset...')
     eval_data_pre = Prepare_Data(image_width, image_height, dataset_path)
-    img_data, label_data = eval_data_pre.prepare_eval_data()
+    img_data, label_data = eval_data_pre.prepare_eval_data(eval_count = eval_count)
     print('Finished: ', img_data.shape, label_data.shape)
 
     # evaluation
@@ -102,6 +104,8 @@ def parse_arguments(argv):
         help = 'Path to fingerprint image dataset', default = '../../dataset/original/')
     parser.add_argument('--check_point', type = str,
         help = 'Path to model checkpoint', default = '../../model/checkpoint/')
+    parser.add_argument('--eval_count', type = int,
+        help = 'Evaluation data count', default = 100)
 
     return parser.parse_args(argv)
 

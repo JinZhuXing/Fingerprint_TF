@@ -228,7 +228,7 @@ class Prepare_Data:
         train_labels_arr = np.array(train_labels)
         return train_imgs_arr, train_labels_arr
 
-    def prepare_eval_data(self, save_url = '', save_img = False):
+    def prepare_eval_data(self, eval_count = 100, save_url = '', save_img = False):
         # get file count
         img_list = os.listdir(self.dataset_path)
         #print(len(img_list))
@@ -243,7 +243,7 @@ class Prepare_Data:
         ExpWidth = EXPAND_WIDTH
         ExpHeight = EXPAND_HEIGHT
         finger_id = 0
-        for choice_idx in range(10):
+        for choice_idx in range(eval_count):
             while True:
                 item = random.choice(img_list)
                 if (item != '.DS_Store') and (item != 'README.md'):
