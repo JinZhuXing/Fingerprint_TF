@@ -293,6 +293,10 @@ def main(args):
         # training model
         model.fit(train_gen, epochs = train_epoch, validation_data = val_gen, callbacks = [cp_callback])
 
+        # save model
+        model_path = save_model_path + 'fp' + str(image_width) + '_' + str(image_height) + '.h5'
+        model.save(model_path)
+
 
 # argument parser
 def parse_arguments(argv):
