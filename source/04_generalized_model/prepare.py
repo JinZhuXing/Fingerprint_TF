@@ -1,6 +1,5 @@
 import cv2
 from PIL import Image, ImageOps
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
