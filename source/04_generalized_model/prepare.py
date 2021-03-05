@@ -132,7 +132,7 @@ class Prepare_Data:
         self.image_height = img_height
         self.dataset_path = dataset_path
 
-    def prepare_train_data(self):
+    def prepare_train_data(self, save_url = '', save_img = False):
         # get file count
         img_list = os.listdir(self.dataset_path)
         #print(len(img_list))
@@ -146,7 +146,7 @@ class Prepare_Data:
         CropHeight = self.image_height
         ExpWidth = EXPAND_WIDTH
         ExpHeight = EXPAND_HEIGHT
-        #finger_idx = 0
+        finger_idx = 0
         finger_id = 0
         for item in img_list:
             if item == '.DS_Store':
@@ -157,7 +157,7 @@ class Prepare_Data:
             finger_id_tmp = parse_file_name2(item)
             if (int(finger_id_tmp) != finger_id):
                 finger_id = int(finger_id_tmp)
-                #finger_idx = 0
+                finger_idx = 0
 
             img_path = self.dataset_path + item
 
@@ -173,24 +173,26 @@ class Prepare_Data:
 
             # single crop
             img_c = img.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-            #img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-            #img_c.save(img_path_new)
-            #finger_idx += 1
             img_arr = np.array(img_c)
             train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
             train_labels.append(finger_id)
+            if save_img == True:
+                img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
+                img_c.save(img_path_new)
+                finger_idx += 1
 
             # rotate crop
             for i in range(3):
                 ang = random.randint(10, 350)
                 img_rot = img.rotate(ang)
                 img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-                #img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-                #img_c.save(img_path_new)
-                #finger_idx += 1
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
+                if save_img == True:
+                    img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
+                    img_c.save(img_path_new)
+                    finger_idx += 1
 
             # auto contrast
             for i in range(3):
@@ -198,12 +200,13 @@ class Prepare_Data:
                 img_autocont = ImageOps.autocontrast(img, 20)
                 img_rot = img_autocont.rotate(ang)
                 img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-                #img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-                #img_c.save(img_path_new)
-                #finger_idx += 1
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
+                if save_img == True:
+                    img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
+                    img_c.save(img_path_new)
+                    finger_idx += 1
             
             # noise
             for i in range(3):
@@ -214,18 +217,19 @@ class Prepare_Data:
                 util.random_noise(img_arr, mode = 'gaussian')
                 img_rot = Image.fromarray(img_arr)
                 img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-                #img_path_new = base_dir + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-                #img_c.save(img_path_new)
-                #finger_idx += 1
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
+                if save_img == True:
+                    img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
+                    img_c.save(img_path_new)
+                    finger_idx += 1
 
         train_imgs_arr = np.array(train_imgs)
         train_labels_arr = np.array(train_labels)
         return train_imgs_arr, train_labels_arr
 
-    def prepare_eval_data(self):
+    def prepare_eval_data(self, save_url = '', save_img = False):
         # get file count
         img_list = os.listdir(self.dataset_path)
         #print(len(img_list))
@@ -264,6 +268,9 @@ class Prepare_Data:
             img_arr = np.array(img_c)
             eval_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
             eval_labels.append(finger_id)
+            if save_img == True:
+                img_path_new = save_url + '{0:05d}'.format(choice_idx) + '_' + '{0:02d}'.format(finger_id) + '.bmp'
+                img_c.save(img_path_new)
 
         eval_imgs_arr = np.array(eval_imgs)
         eval_labels_arr = np.array(eval_labels)
