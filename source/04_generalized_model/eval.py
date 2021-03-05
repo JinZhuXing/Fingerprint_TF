@@ -171,71 +171,12 @@ def build_model(img_width, img_height):
     return model
 
 
-# data generator definition
-class DataGenerator(keras.utils.Sequence):
-    def __init__(self, img_data, label_data, img_width, img_height, batch_size = 32, shuffle = True):
-        'Initialization'
-        self.img_data = img_data
-        self.label_data = label_data
-        self.img_width = img_width
-        self.img_height = img_height
-        self.batch_size = batch_size
-        self.shuffle = shuffle
-        self.on_epoch_end()
-
-    def __len__(self):
-        'Denotes the number of batches per epoch'
-        return int(np.floor(len(self.img_data) / self.batch_size) * 2)
-
-    def __getitem__(self, index):
-        'Generate one batch of data'
-        real_idx = index
-        index = int(np.floor(index / 2))
-        img1_batch = self.img_data[index * self.batch_size : (index + 1) * self.batch_size]
-        label1_batch = self.label_data[index * self.batch_size : (index + 1) * self.batch_size]
-        img2_batch = np.empty((self.batch_size, self.img_width, self.img_height, 1), dtype = np.float32)
-        label2_batch = np.zeros((self.batch_size, 1), dtype = np.float32)
-
-        for i, idx in enumerate(label1_batch):
-            if random.random() > 0.5:
-                # put matched image
-                while True:
-                    match_idx = random.choice(range(len(self.label_data)))
-                    if (self.label_data[match_idx] == idx):
-                        break
-
-                img2_batch[i] = self.img_data[match_idx]
-                label2_batch[i] = 1.
-            else:
-                # put unmatched image
-                while True:
-                    unmatch_idx = random.choice(range(len(self.label_data)))
-                    if (self.label_data[unmatch_idx] != idx):
-                        break
-
-                img2_batch[i] = self.img_data[unmatch_idx]
-                label2_batch[i] = 0.
-                
-        index = real_idx
-        if (index < int(np.floor(len(self.img_data) / self.batch_size))):
-            return [img1_batch.astype(np.float32) / 255., img2_batch.astype(np.float32) / 255.], label2_batch
-        
-        return [img2_batch.astype(np.float32) / 255., img1_batch.astype(np.float32) / 255.], label2_batch
-
-    def on_epoch_end(self):
-        if self.shuffle == True:
-            self.img_data, self.label_data = shuffle(self.img_data, self.label_data)
-
-
 # main process
 def main(args):
     image_width = args.image_width
     image_height = args.image_height
     dataset_path = args.dataset_path
     check_point = args.check_point
-    save_model = args.save_model
-    save_model_path = args.save_model_path
-    train_epoch = args.train_epoch
 
     # check parameter
     if ((image_width > IMAGE_WIDTH_LIMIT) or (image_height > IMAGE_HEIGHT_LIMIT)):
@@ -253,48 +194,46 @@ def main(args):
     print('\tImage Height: ', image_height)
     print('\tDataset Path: ', dataset_path)
     print('\tCheckpoint Path: ', check_point)
-    print('\tTrain Epoch: ', train_epoch)
-
-    # create a callback that saves the model's weights
-    checkpoint_path = check_point + 'cp_' + str(image_width) + '_' + str(image_height) + '.ckpt'
-    cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_path, save_weights_only = True, verbose = 1)
 
     # prepare model
     model = build_model(image_width, image_height)
+    checkpoint_path = check_point + 'cp_' + str(image_width) + '_' + str(image_height) + '.ckpt'
     if (os.path.exists(checkpoint_path + '.index')):
-        print('continue training')
         model.load_weights(checkpoint_path)
-    
-    # check only save
-    if (save_model == 1):
-        model_path = save_model_path + 'fp' + str(image_width) + '_' + str(image_height) + '.h5'
-        model.save(model_path)
-        return
 
     # prepare data
-    while True:
-        print('Prepare Dataset...')
-        train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
-        img_data, label_data = train_data_pre.prepare_train_data()
-        print('Finished: ', img_data.shape, label_data.shape)
+    print('Prepare Dataset...')
+    eval_data_pre = Prepare_Data(image_width, image_height, dataset_path)
+    img_data, label_data = eval_data_pre.prepare_eval_data()
+    print('Finished: ', img_data.shape, label_data.shape)
 
-        # split data
-        print('Split Dataset for train and validation...')
-        img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
-        print('Finished: ')
-        print(img_train.shape, label_train.shape)
-        print(img_val.shape, label_val.shape)
+    # evaluation
+    total_count = 0
+    error_reject_cnt = 0
+    error_accept_cnt = 0
+    error_rage = 0.8
+    for input_idx in range(label_data.shape[0]):
+        print('Processing #', input_idx, '')
+        for db_idx in range(label_data.shape[0]):
+            input_img = img_data[input_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+            db_img = img_data[db_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+            pred_right = model.predict([input_img, db_img])
+            if (label_data[input_idx] == label_data[db_idx]):
+                if (pred_right < error_rage):
+                    print('False Reject = ', pred_right)
+                    error_reject_cnt += 1
+            else:
+                if (pred_right > error_rage):
+                    print('False Accept = ', pred_right, ', ID = ', db_idx)
+                    error_accept_cnt += 1
+            total_count += 1
 
-        # prepare data generator
-        train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = True)
-        val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = True)
-
-        # training model
-        model.fit(train_gen, epochs = train_epoch, validation_data = val_gen, callbacks = [cp_callback])
-
-        # save model
-        model_path = save_model_path + 'fp' + str(image_width) + '_' + str(image_height) + '.h5'
-        model.save(model_path)
+    # show result
+    print('Evaluation Finished')
+    print('Total Count = ', total_count)
+    print('Error Reject Count = ', error_reject_cnt)
+    print('Error Accept Count = ', error_accept_cnt)
+    print('Error Rate = ', ((error_reject_cnt + error_accept_cnt) / total_count) * 100)
 
 
 # argument parser
@@ -310,12 +249,6 @@ def parse_arguments(argv):
         help = 'Path to fingerprint image dataset', default = '../../dataset/original/')
     parser.add_argument('--check_point', type = str,
         help = 'Path to model checkpoint', default = '../../model/checkpoint/')
-    parser.add_argument('--save_model', type = int,
-        help = 'Only save model from checkpoint', default = 0)
-    parser.add_argument('--save_model_path', type = str,
-        help = 'Path to model', default = '../../model/result/')
-    parser.add_argument('--train_epoch', type = int,
-        help = 'Train epoch count', default = 100)
 
     return parser.parse_args(argv)
 

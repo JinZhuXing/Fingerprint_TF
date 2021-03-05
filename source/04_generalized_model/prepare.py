@@ -224,3 +224,47 @@ class Prepare_Data:
         train_imgs_arr = np.array(train_imgs)
         train_labels_arr = np.array(train_labels)
         return train_imgs_arr, train_labels_arr
+
+    def prepare_eval_data(self):
+        # get file count
+        img_list = os.listdir(self.dataset_path)
+        #print(len(img_list))
+
+        # prepare dataset variables
+        eval_imgs = []
+        eval_labels = []
+
+        # prepare data
+        CropWidth = self.image_width
+        CropHeight = self.image_height
+        ExpWidth = EXPAND_WIDTH
+        ExpHeight = EXPAND_HEIGHT
+        finger_id = 0
+        for choice_idx in range(10):
+            while True:
+                item = random.choice(img_list)
+                if (item != '.DS_Store') and (item != 'README.md'):
+                    break
+
+            finger_id = parse_file_name2(item)
+            img_path = self.dataset_path + item
+
+            # get fingerprint region
+            (crop_l, crop_t, crop_r, crop_b) = get_fp_region(img_path, CropWidth, CropHeight)
+
+            img = Image.open(img_path)
+
+            # crop for process image
+            crop_x = (ExpWidth - CropWidth) / 2
+            crop_y = (ExpHeight - CropHeight) / 2
+            img = img.crop([crop_l, crop_t, crop_r, crop_b])
+
+            # single crop
+            img_c = img.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
+            img_arr = np.array(img_c)
+            eval_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
+            eval_labels.append(finger_id)
+
+        eval_imgs_arr = np.array(eval_imgs)
+        eval_labels_arr = np.array(eval_labels)
+        return eval_imgs_arr, eval_labels_arr
