@@ -162,13 +162,13 @@ def parse_arguments(argv):
     parser.add_argument('--image_height', type = int,
         help = 'Process image height', default = 128)
     parser.add_argument('--dataset_path', type = str,
-        help = 'Path to fingerprint image dataset', default = '../../dataset/original/')
+        help = 'Path to fingerprint image dataset', default = '../dataset/original/')
     parser.add_argument('--check_point', type = str,
-        help = 'Path to model checkpoint', default = '../../model/checkpoint/')
+        help = 'Path to model checkpoint', default = '../model/checkpoint/')
     parser.add_argument('--save_model', type = int,
         help = 'Only save model from checkpoint', default = 0)
     parser.add_argument('--save_model_path', type = str,
-        help = 'Path to model', default = '../../model/result/')
+        help = 'Path to model', default = '../model/result/')
     parser.add_argument('--train_epoch', type = int,
         help = 'Train epoch count', default = 100)
 

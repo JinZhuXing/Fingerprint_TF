@@ -101,9 +101,9 @@ def parse_arguments(argv):
     parser.add_argument('--image_height', type = int,
         help = 'Process image height', default = 128)
     parser.add_argument('--dataset_path', type = str,
-        help = 'Path to fingerprint image dataset', default = '../../dataset/original/')
+        help = 'Path to fingerprint image dataset', default = '../dataset/original/')
     parser.add_argument('--check_point', type = str,
-        help = 'Path to model checkpoint', default = '../../model/checkpoint/')
+        help = 'Path to model checkpoint', default = '../model/checkpoint/')
     parser.add_argument('--eval_count', type = int,
         help = 'Evaluation data count', default = 100)
 
