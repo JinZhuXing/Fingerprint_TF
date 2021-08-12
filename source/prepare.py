@@ -1,9 +1,7 @@
-import cv2
 from PIL import Image, ImageOps
 import numpy as np
 import os
 import random
-from skimage import util, filters, morphology
 
 
 # global variables
@@ -23,6 +21,79 @@ def parse_file_name2(img_path):
     #print(finger_id, finger_index)
     return np.array([finger_id], dtype=np.uint16)
 
+# Otsu Binalization
+def otsu_binarization(img, th = 128):
+    H, W = img.shape
+    out = img.copy()
+
+    max_sigma = 0
+    max_t = 0
+
+    # determine threshold
+    for _t in range(1, 255):
+        v0 = out[np.where(out < _t)]
+        m0 = np.mean(v0) if len(v0) > 0 else 0.
+        w0 = len(v0) / (H * W)
+        v1 = out[np.where(out >= _t)]
+        m1 = np.mean(v1) if len(v1) > 0 else 0.
+        w1 = len(v1) / (H * W)
+        sigma = w0 * w1 * ((m0 - m1) ** 2)
+        if sigma > max_sigma:
+            max_sigma = sigma
+            max_t = _t
+
+    # Binarization
+    # print("threshold >>", max_t)
+    th = max_t
+    out[out < th] = 0
+    out[out >= th] = 255
+
+    return out
+
+
+# Morphology Dilate
+def Morphology_Dilate(img, Dil_time=1):
+    H, W = img.shape
+
+    # kernel
+    MF = np.array(((0, 1, 0),
+                (1, 0, 1),
+                (0, 1, 0)), dtype=np.int)
+
+    # each dilate time
+    out = img.copy()
+    for i in range(Dil_time):
+        tmp = np.pad(out, (1, 1), 'edge')
+        for y in range(1, H):
+            for x in range(1, W):
+                if np.sum(MF * tmp[y-1:y+2, x-1:x+2]) >= 255:
+                    out[y, x] = 255
+
+    return out
+
+
+# Morphology Erode
+def Morphology_Erode(img, Erode_time=1):
+    H, W = img.shape
+    out = img.copy()
+
+    # kernel
+    MF = np.array(((0, 1, 0),
+                (1, 0, 1),
+                (0, 1, 0)), dtype=np.int)
+
+    # each erode
+    for i in range(Erode_time):
+        tmp = np.pad(out, (1, 1), 'edge')
+        # erode
+        for y in range(1, H):
+            for x in range(1, W):
+                if np.sum(MF * tmp[y-1:y+2, x-1:x+2]) < 255*4:
+                    out[y, x] = 0
+
+    return out
+
+
 # get fingerprint region for crop
 def get_fp_region(img_path, crop_width, crop_height):
     CropWidth = crop_width
@@ -30,15 +101,17 @@ def get_fp_region(img_path, crop_width, crop_height):
     ExpWidth = EXPAND_WIDTH
     ExpHeight = EXPAND_HEIGHT
 
-    image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-    thresh = filters.threshold_otsu(image)
+    image = Image.open(img_path)
+    image_buf = np.asarray(image)
 
-    bw = morphology.closing(image > thresh, morphology.square(3))
+    # otsu binarization
+    otsu = otsu_binarization(image_buf)
 
-    cleared = bw.copy()
+    # morphology
+    cleared = Morphology_Erode(otsu, Erode_time = 2)
 
-    img_width = image.shape[1]
-    img_height = image.shape[0]
+    img_width = image_buf.shape[1]
+    img_height = image_buf.shape[0]
     #print(img_width, img_height)
 
     crop_l = img_width
@@ -47,7 +120,7 @@ def get_fp_region(img_path, crop_width, crop_height):
     crop_b = 0
     for i in range(img_height):
         for j in range(img_width):
-            if cleared[i, j] == False:
+            if cleared[i, j] == 0:
                 if (crop_l > j):
                     crop_l = j
                 if (crop_r < j):
@@ -181,7 +254,7 @@ class Prepare_Data:
                 finger_idx += 1
 
             # rotate crop
-            for i in range(3):
+            for i in range(5):
                 ang = random.randint(10, 350)
                 img_rot = img.rotate(ang)
                 img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
@@ -194,27 +267,10 @@ class Prepare_Data:
                     finger_idx += 1
 
             # auto contrast
-            for i in range(3):
+            for i in range(4):
                 ang = random.randint(10, 350)
                 img_autocont = ImageOps.autocontrast(img, 20)
                 img_rot = img_autocont.rotate(ang)
-                img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
-                img_arr = np.array(img_c)
-                train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
-                train_labels.append(finger_id)
-                if save_img == True:
-                    img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
-                    img_c.save(img_path_new)
-                    finger_idx += 1
-            
-            # noise
-            for i in range(3):
-                ang = random.randint(10, 350)
-                img_autocont = ImageOps.autocontrast(img, 20)
-                img_rot = img_autocont.rotate(ang)
-                img_arr = np.array(img_rot)
-                util.random_noise(img_arr, mode = 'gaussian')
-                img_rot = Image.fromarray(img_arr)
                 img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))

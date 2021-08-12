@@ -11,8 +11,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
 import random
 
 
@@ -78,7 +76,8 @@ class DataGenerator(keras.utils.Sequence):
 
     def on_epoch_end(self):
         if self.shuffle == True:
-            self.img_data, self.label_data = shuffle(self.img_data, self.label_data)
+            # self.img_data, self.label_data = shuffle(self.img_data, self.label_data)
+            pass
 
 
 # main process
@@ -135,14 +134,18 @@ def main(args):
 
         # split data
         print('Split Dataset for train and validation...')
-        img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
+        # img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
+        img_train = img_data[:(int)(img_data.shape[0] * 0.9)]
+        label_train = label_data[:(int)(label_data.shape[0] * 0.9)]
+        img_val = img_data[(int)(img_data.shape[0] * 0.9):]
+        label_val = label_data[(int)(label_data.shape[0] * 0.9):]
         print('Finished: ')
         print(img_train.shape, label_train.shape)
         print(img_val.shape, label_val.shape)
 
         # prepare data generator
-        train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = True)
-        val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = True)
+        train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = False)
+        val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = False)
 
         # training model
         model.fit(train_gen, epochs = train_epoch, validation_data = val_gen, callbacks = [cp_callback])
