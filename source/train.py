@@ -80,6 +80,27 @@ class DataGenerator(keras.utils.Sequence):
             pass
 
 
+# train, valid data split
+def train_val_data_split(img_data, label_data, train_per = 0.9, shuffle = True):
+    if (shuffle == True):
+        idx_info = np.random.permutation(img_data.shape[0])
+        # print(idx_info)
+        img_data_work = img_data[idx_info, :, :, :]
+        label_data_work = label_data[idx_info]
+    else:
+        img_data_work = img_data[:]
+        label_data_work = label_data[:]
+
+    # print(label_data[0])
+    # print(label_data_work[0])
+
+    img_train = img_data_work[:(int)(img_data.shape[0] * train_per)]
+    label_train = label_data_work[:(int)(label_data.shape[0] * train_per)]
+    img_val = img_data_work[(int)(img_data.shape[0] * train_per):]
+    label_val = label_data_work[(int)(label_data.shape[0] * train_per):]
+    return (img_train, img_val, label_train, label_val)
+
+
 # main process
 def main(args):
     image_width = args.image_width
@@ -134,11 +155,7 @@ def main(args):
 
         # split data
         print('Split Dataset for train and validation...')
-        # img_train, img_val, label_train, label_val = train_test_split(img_data, label_data, test_size = 0.1)
-        img_train = img_data[:(int)(img_data.shape[0] * 0.9)]
-        label_train = label_data[:(int)(label_data.shape[0] * 0.9)]
-        img_val = img_data[(int)(img_data.shape[0] * 0.9):]
-        label_val = label_data[(int)(label_data.shape[0] * 0.9):]
+        (img_train, img_val, label_train, label_val) = train_val_data_split(img_data, label_data, train_per = 0.9, shuffle = True)
         print('Finished: ')
         print(img_train.shape, label_train.shape)
         print(img_val.shape, label_val.shape)
