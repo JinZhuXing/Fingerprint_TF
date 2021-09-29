@@ -151,6 +151,6 @@ class Model_Net:
         model.summary()
 
         # compile
-        model.compile(loss = 'binary_crossentropy', optimizer = optimizers.RMSprop(lr=1e-4), metrics = ['acc'])
+        model.compile(loss = 'binary_crossentropy', optimizer = optimizers.RMSprop(learning_rate=1e-4), metrics = ['acc'])
 
         return model
