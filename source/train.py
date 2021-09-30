@@ -202,7 +202,7 @@ def parse_arguments(argv):
     parser.add_argument('--save_model_path', type = str,
         help = 'Path to model', default = '../model/result/')
     parser.add_argument('--train_epoch', type = int,
-        help = 'Train epoch count', default = 100)
+        help = 'Train epoch count', default = 10000)
 
     return parser.parse_args(argv)
 

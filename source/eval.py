@@ -58,22 +58,22 @@ def main(args):
 
     # prepare data
     print('Prepare Dataset...')
-    eval_data_pre = Prepare_Data(image_width, image_height, dataset_path)
-    img_data, label_data = eval_data_pre.prepare_eval_data(eval_count = eval_count)
-    print('Finished: ', img_data.shape, label_data.shape)
+    img_test = np.load(dataset_path + 'img_test.npy')
+    label_test = np.load(dataset_path + 'label_test.npy')
+    print('Finished: ', img_test.shape, label_test.shape)
 
     # evaluation
     total_count = 0
     error_reject_cnt = 0
     error_accept_cnt = 0
     error_rage = 0.8
-    for input_idx in range(label_data.shape[0]):
+    for input_idx in range(label_test.shape[0]):
         print('Processing #', input_idx, '')
-        for db_idx in range(label_data.shape[0]):
-            input_img = img_data[input_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
-            db_img = img_data[db_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+        for db_idx in range(label_test.shape[0]):
+            input_img = img_test[input_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+            db_img = img_test[db_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
             pred_right = model.predict([input_img, db_img])
-            if (label_data[input_idx] == label_data[db_idx]):
+            if (label_test[input_idx] == label_test[db_idx]):
                 if (pred_right < error_rage):
                     print('False Reject = ', pred_right)
                     error_reject_cnt += 1
