@@ -146,20 +146,21 @@ def main(args):
         model.save(model_path)
         return
 
+    # load data from dataset
+    img_train = np.load(dataset_path + 'img_train.npy')
+    label_train = np.load(dataset_path + 'label_train.npy')
+    img_val = np.load(dataset_path + 'img_val.npy')
+    label_val = np.load(dataset_path + 'label_val.npy')
+    img_test = np.load(dataset_path + 'img_test.npy')
+    label_test = np.load(dataset_path + 'label_test.npy')
+
+    # show data information
+    print(img_train.shape, label_train.shape)
+    print(img_val.shape, label_val.shape)
+    print(img_test.shape, label_test.shape)
+
     # prepare data
     while True:
-        print('Prepare Dataset...')
-        train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
-        img_data, label_data = train_data_pre.prepare_train_data()
-        print('Finished: ', img_data.shape, label_data.shape)
-
-        # split data
-        print('Split Dataset for train and validation...')
-        (img_train, img_val, label_train, label_val) = train_val_data_split(img_data, label_data, train_per = 0.9, shuffle = True)
-        print('Finished: ')
-        print(img_train.shape, label_train.shape)
-        print(img_val.shape, label_val.shape)
-
         # prepare data generator
         train_gen = DataGenerator(img_train, label_train, image_width, image_height, shuffle = False)
         val_gen = DataGenerator(img_val, label_val, image_width, image_height, shuffle = False)
@@ -170,6 +171,37 @@ def main(args):
         # save model
         model_path = save_model_path + 'fp' + str(image_width) + '_' + str(image_height) + '.h5'
         model.save(model_path)
+
+        # evaluation model
+        print('==========================================================')
+        print('Evaluation')
+        total_count = 0
+        error_reject_cnt = 0
+        error_accept_cnt = 0
+        error_rage = 0.8
+        for input_idx in range(label_test.shape[0]):
+            print('Processing #', input_idx, '')
+            for db_idx in range(label_test.shape[0]):
+                input_img = img_test[input_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+                db_img = img_test[db_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
+                pred_right = model.predict([input_img, db_img])
+                if (label_test[input_idx] == label_test[db_idx]):
+                    if (pred_right < error_rage):
+                        print('False Reject = ', pred_right)
+                        error_reject_cnt += 1
+                else:
+                    if (pred_right > error_rage):
+                        print('False Accept = ', pred_right, ', ID = ', db_idx)
+                        error_accept_cnt += 1
+                total_count += 1
+
+        # show result
+        print('Evaluation Finished')
+        print('Total Count = ', total_count)
+        print('Error Reject Count = ', error_reject_cnt)
+        print('Error Accept Count = ', error_accept_cnt)
+        print('Error Rate = ', ((error_reject_cnt + error_accept_cnt) / total_count) * 100)
+        print('==========================================================')
 
 
 # argument parser
@@ -182,7 +214,7 @@ def parse_arguments(argv):
     parser.add_argument('--image_height', type = int,
         help = 'Process image height', default = 128)
     parser.add_argument('--dataset_path', type = str,
-        help = 'Path to fingerprint image dataset', default = '../dataset/original/')
+        help = 'Path to fingerprint image dataset', default = '../dataset/')
     parser.add_argument('--check_point', type = str,
         help = 'Path to model checkpoint', default = '../model/checkpoint/')
     parser.add_argument('--save_model', type = int,
@@ -190,7 +222,7 @@ def parse_arguments(argv):
     parser.add_argument('--save_model_path', type = str,
         help = 'Path to model', default = '../model/result/')
     parser.add_argument('--train_epoch', type = int,
-        help = 'Train epoch count', default = 100)
+        help = 'Train epoch count', default = 10000)
 
     return parser.parse_args(argv)
 
