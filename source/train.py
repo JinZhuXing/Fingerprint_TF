@@ -90,6 +90,7 @@ def main(args):
     save_model = args.save_model
     save_model_path = args.save_model_path
     train_epoch = args.train_epoch
+    eval_num = args.eval_num
 
     # check parameter
     if ((image_width > IMAGE_WIDTH_LIMIT) or (image_height > IMAGE_HEIGHT_LIMIT)):
@@ -159,9 +160,13 @@ def main(args):
         error_reject_cnt = 0
         error_accept_cnt = 0
         error_rage = 0.8
-        for input_idx in range(label_test.shape[0]):
+        if (eval_num < label_test.shape[0]):
+            test_cnt = eval_num
+        else:
+            test_cnt = label_test.shape[0]
+        for input_idx in range(test_cnt):
             print('Processing #', input_idx, '')
-            for db_idx in range(label_test.shape[0]):
+            for db_idx in range(test_cnt):
                 input_img = img_test[input_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
                 db_img = img_test[db_idx].reshape((1, image_width, image_height, 1)).astype(np.float32) / 255.
                 pred_right = model.predict([input_img, db_img])
@@ -203,6 +208,8 @@ def parse_arguments(argv):
         help = 'Path to model', default = '../model/result/')
     parser.add_argument('--train_epoch', type = int,
         help = 'Train epoch count', default = 10000)
+    parser.add_argument('--eval_num', type = int,
+        help = 'Evaluation count', default = 100)
 
     return parser.parse_args(argv)
 
