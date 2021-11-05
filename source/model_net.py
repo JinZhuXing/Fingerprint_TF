@@ -132,7 +132,7 @@ class Model_Net:
         output_1 = self.feature_net(input_1)
         output_2 = self.feature_net(input_2)
 
-        sub = layers.Subtract()([output_1, output_2])
+        sub = layers.Multiply()([output_1, output_2])
 
         # |== Layer 5 ==|
         x = conv_8(sub)
