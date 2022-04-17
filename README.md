@@ -1,6 +1,6 @@
 # Fingerprint_TF
 
-[![Join the chat at https://gitter.im/Fingerprint_TF/community](https://badges.gitter.im/Fingerprint_TF/community.svg)](https://gitter.im/Fingerprint_TF/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/Fingerprint_TF/community](https://badges.gitter.im/Fingerprint_TF/community.svg)](https://gitter.im/Fingerprint_TF/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![GitHub](https://img.shields.io/github/license/JinZhuXing/Fingerprint_TF)
 
 Deep Learning fingerprint recognition using Tensorflow2.
 
