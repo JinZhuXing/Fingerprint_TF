@@ -1,4 +1,7 @@
 # Fingerprint_TF
+
+[![Join the chat at https://gitter.im/Fingerprint_TF/community](https://badges.gitter.im/Fingerprint_TF/community.svg)](https://gitter.im/Fingerprint_TF/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Deep Learning fingerprint recognition using Tensorflow2.
 
 ### Image Information
