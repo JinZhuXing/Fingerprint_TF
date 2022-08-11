@@ -145,3 +145,6 @@ logs
 
 # vscode
 .vscode
+
+# pycharm
+.idea
