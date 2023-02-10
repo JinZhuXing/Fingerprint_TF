@@ -145,8 +145,8 @@ class Prepare_Data:
         CropHeight = self.image_height
         ExpWidth = EXPAND_WIDTH
         ExpHeight = EXPAND_HEIGHT
-        finger_idx = 0
-        finger_id = 0
+        finger_idx = -1
+        finger_id = -1
         for item in img_list:
             if item == '.DS_Store':
                 continue
@@ -157,17 +157,20 @@ class Prepare_Data:
             if (int(finger_id_tmp) != finger_id):
                 finger_id = int(finger_id_tmp)
                 finger_idx = 0
+            else:
+                continue
 
             img_path = self.dataset_path + item
 
             # get fingerprint region
             (crop_l, crop_t, crop_r, crop_b) = get_fp_region(img_path, CropWidth, CropHeight)
+            # print('Finger Region: ', crop_l, crop_t, crop_r, crop_b)
 
             img = Image.open(img_path)
 
             # crop for process image
-            crop_x = (ExpWidth - CropWidth) / 2
-            crop_y = (ExpHeight - CropHeight) / 2
+            crop_x = (crop_r - crop_l - CropWidth) / 2
+            crop_y = (crop_b - crop_t - CropHeight) / 2
             img = img.crop([crop_l, crop_t, crop_r, crop_b])
 
             # single crop
@@ -180,11 +183,30 @@ class Prepare_Data:
                 img_c.save(img_path_new)
                 finger_idx += 1
 
+            # shift four directions
+            for i in range(4):
+                shift_x = random.randint(0 - (CropWidth / 4), CropWidth / 4)
+                if (crop_x + shift_x < 0):
+                    shift_x = 0 - crop_x
+                shift_y = random.randint(0 - (CropHeight / 4), CropHeight / 4)
+                if (crop_y + shift_y < 0):
+                    shift_y = 0 - crop_y
+                img_c = img.crop([crop_x + shift_x, crop_y + shift_y, crop_x + shift_x + CropWidth, crop_y + shift_y + CropHeight])
+                img_arr = np.array(img_c)
+                train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
+                train_labels.append(finger_id)
+                if save_img == True:
+                    img_path_new = save_url + '{0:05d}'.format(finger_id) + '_' + '{0:02d}'.format(finger_idx) + '.bmp'
+                    img_c.save(img_path_new)
+                    finger_idx += 1
+
             # rotate crop
-            for i in range(3):
+            for i in range(5):
                 ang = random.randint(10, 350)
+                shift_x = random.randint(0, CropWidth / 8)
+                shift_y = random.randint(0, CropWidth / 8)
                 img_rot = img.rotate(ang)
-                img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
+                img_c = img_rot.crop([crop_x + shift_x, crop_y + shift_y, crop_x + shift_x + CropWidth, crop_y + shift_y + CropHeight])
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
@@ -194,11 +216,13 @@ class Prepare_Data:
                     finger_idx += 1
 
             # auto contrast
-            for i in range(3):
+            for i in range(5):
                 ang = random.randint(10, 350)
+                shift_x = random.randint(0, CropWidth / 8)
+                shift_y = random.randint(0, CropWidth / 8)
                 img_autocont = ImageOps.autocontrast(img, 20)
                 img_rot = img_autocont.rotate(ang)
-                img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
+                img_c = img_rot.crop([crop_x + shift_x, crop_y + shift_y, crop_x + shift_x + CropWidth, crop_y + shift_y + CropHeight])
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)
@@ -208,14 +232,16 @@ class Prepare_Data:
                     finger_idx += 1
             
             # noise
-            for i in range(3):
+            for i in range(5):
                 ang = random.randint(10, 350)
+                shift_x = random.randint(0, CropWidth / 8)
+                shift_y = random.randint(0, CropWidth / 8)
                 img_autocont = ImageOps.autocontrast(img, 20)
                 img_rot = img_autocont.rotate(ang)
                 img_arr = np.array(img_rot)
                 util.random_noise(img_arr, mode = 'gaussian')
                 img_rot = Image.fromarray(img_arr)
-                img_c = img_rot.crop([crop_x, crop_y, crop_x + CropWidth, crop_y + CropHeight])
+                img_c = img_rot.crop([crop_x + shift_x, crop_y + shift_y, crop_x + shift_x + CropWidth, crop_y + shift_y + CropHeight])
                 img_arr = np.array(img_c)
                 train_imgs.append(img_arr.reshape(CropWidth, CropHeight, 1))
                 train_labels.append(finger_id)

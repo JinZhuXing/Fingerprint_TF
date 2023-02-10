@@ -41,6 +41,7 @@ def main(args):
     # prepare data
     print('Prepare Dataset...')
     train_data_pre = Prepare_Data(image_width, image_height, dataset_path)
+    # img_data, label_data = train_data_pre.prepare_train_data(save_url='../dataset/out/', save_img=True)
     img_data, label_data = train_data_pre.prepare_train_data()
     print('Finished: ', img_data.shape, label_data.shape)
 
